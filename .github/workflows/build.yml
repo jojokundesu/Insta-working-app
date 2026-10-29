@@ -17,9 +17,13 @@ jobs:
         with: { gradle-version: '8.7' }
       - name: Build release APK (debug-signed for sideloading)
         run: set -o pipefail; gradle assembleRelease --stacktrace 2>&1 | tee build.log
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with: { name: build-log, path: build.log }
+      - name: Push build log on failure (diagnostics)
+        if: failure()
+        run: |
+          tail -250 build.log > BUILD_LOG.txt || true
+          git config user.email ci@github.com; git config user.name ci
+          git add BUILD_LOG.txt; git commit -m "CI build log" || exit 0
+          git push origin HEAD:arena/5082c47d-insta-working-app || true
       - name: Stage APK
         run: cp app/build/outputs/apk/release/app-release.apk InstaScope.apk
       - uses: actions/upload-artifact@v4
