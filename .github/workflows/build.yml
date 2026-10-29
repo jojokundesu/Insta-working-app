@@ -1,0 +1,29 @@
+name: Build APK
+on: { push: { branches: ["**"] }, workflow_dispatch: }
+permissions: { contents: write }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: android-actions/setup-android@v3
+      - name: Install SDK 34
+        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: '8.7' }
+      - name: Build release APK (debug-signed for sideloading)
+        run: gradle assembleRelease --stacktrace
+      - name: Stage APK
+        run: cp app/build/outputs/apk/release/app-release.apk InstaScope.apk
+      - uses: actions/upload-artifact@v4
+        with: { name: InstaScope-apk, path: InstaScope.apk }
+      - name: Publish GitHub Release
+        if: github.ref == 'refs/heads/arena/5082c47d-insta-working-app'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: InstaScope v1.0.0
+          files: InstaScope.apk
+          body: "Install: download InstaScope.apk, allow install from browser/files, open, paste an Instagram link or @handle, tap Scan. Optional HikerAPI token field enables the API profile/posts path."
