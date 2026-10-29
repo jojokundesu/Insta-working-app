@@ -52,7 +52,7 @@ public class Engine {
             if(u.has("edge_follow")) o.put("following",u.getJSONObject("edge_follow").optLong("count"));
             JSONObject tl=u.optJSONObject("edge_owner_to_timeline_media");
             if(tl!=null){ o.put("posts",tl.optLong("count"));
-                Map<String,Integer> tags=new TreeMap<>(); JSONArray locs=new JSONArray(), recent=new JSONArray();
+                Map<String,Integer> tags=new TreeMap<>(); JSONArray locs=new JSONArray(), recent=new JSONArray(), imgs=new JSONArray();
                 JSONArray edges=tl.optJSONArray("edges");
                 if(edges!=null) for(int i=0;i<Math.min(edges.length(),50);i++){
                     JSONObject node=edges.getJSONObject(i).optJSONObject("node"); if(node==null) continue;
@@ -62,12 +62,14 @@ public class Engine {
                     Matcher mm=Pattern.compile("#(\\w+)").matcher(text);
                     while(mm.find()) tags.merge(mm.group(1).toLowerCase(),1,Integer::sum);
                     JSONObject loc=node.optJSONObject("location"); if(loc!=null&&loc.has("name")) locs.put(loc.optString("name"));
+                    if(node.has("display_url")) imgs.put(node.optString("display_url"));
+                    else if(node.has("thumbnail_src")) imgs.put(node.optString("thumbnail_src"));
                     JSONObject r=new JSONObject(); r.put("taken_at",node.optLong("taken_at_timestamp"));
                     if(loc!=null) r.put("location_name",loc.optString("name"));
                     r.put("likes",node.optJSONObject("edge_liked_by")!=null?node.getJSONObject("edge_liked_by").optLong("count"):0);
                     recent.put(r);
                 }
-                o.put("hashtags",new JSONObject(tags)); o.put("displayed_location_names",locs); o.put("recent_posts",recent);
+                o.put("hashtags",new JSONObject(tags)); o.put("displayed_location_names",locs); o.put("recent_posts",recent); o.put("post_image_urls",imgs);
             }
             return o;
         }catch(Exception apiErr){
@@ -81,33 +83,36 @@ public class Engine {
         }
     }
     public static class Hit { public String site,url,extra=""; }
+    static final String[] NOT_FOUND={"user not found","page not found","profile not found","account not found","doesn't exist","does not exist","couldn't find","could not find","no longer exists","this account is private","sorry, this page isn","404 not found","content isn't available","user_not_found","not be found"};
+    static boolean looksReal(String body,String finalUrl,String user,String siteErr){
+        if(body==null) return false; String b=body.toLowerCase();
+        if(siteErr!=null && b.contains(siteErr.toLowerCase())) return false;
+        for(String nf:NOT_FOUND) if(b.contains(nf)) return false;
+        // real profile pages virtually always mention the handle somewhere (title/meta/body)
+        return b.contains(user.toLowerCase()) || finalUrl.toLowerCase().contains(user.toLowerCase());
+    }
     public static List<Hit> enumerate(String user,Cb cb) throws Exception {
         List<Hit> hits=Collections.synchronizedList(new ArrayList<>());
         ExecutorService ex=Executors.newFixedThreadPool(16); List<Future<?>> fs=new ArrayList<>();
         final int[] done={0};
         for(Sites.Site st: Sites.ALL) fs.add(ex.submit(()->{
-            String url=st.tpl.replace("{}",user); String finalUrl=url;
+            String url=st.tpl.replace("{}",user);
             try{
                 HttpURLConnection c=(HttpURLConnection)new URL(url).openConnection();
                 c.setRequestProperty("User-Agent",UA); c.setConnectTimeout(9000); c.setReadTimeout(9000); c.setInstanceFollowRedirects(true);
-                int code=c.getResponseCode(); boolean found;
-                if("message".equals(st.mode)){
-                    InputStream is=code>=400?c.getErrorStream():c.getInputStream(); String body="";
-                    if(is!=null){ ByteArrayOutputStream b=new ByteArrayOutputStream(); byte[] bf=new byte[8192]; int n,t=0;
-                        while((n=is.read(bf))>0){b.write(bf,0,n);t+=n; if(t>200_000)break;} body=b.toString("UTF-8"); }
-                    found=code==200 && (st.err==null||!body.toLowerCase().contains(st.err.toLowerCase()));
-                    if(found){ Hit hit=new Hit(); hit.site=st.name; hit.url=url;
-                        String t=meta(body,"og:title"), d=meta(body,"og:description");
-                        hit.extra=(t.isEmpty()?"":t)+(d.isEmpty()?"":" — "+(d.length()>180?d.substring(0,180)+"…":d)); hits.add(hit); }
-                } else {
-                    found=(code==200);
-                    if(found){ Hit hit=new Hit(); hit.site=st.name; hit.url=c.getURL().toString();
-                        try{ String body=http(hit.url,null); String t=meta(body,"og:title"), d=meta(body,"og:description");
-                            hit.extra=(t.isEmpty()?"":t)+(d.isEmpty()?"":" — "+(d.length()>180?d.substring(0,180)+"…":d)); }catch(Exception ignored){}
-                        hits.add(hit); }
-                }
+                int code=c.getResponseCode();
+                InputStream is=code>=400?c.getErrorStream():c.getInputStream(); String body="";
+                if(is!=null){ ByteArrayOutputStream b=new ByteArrayOutputStream(); byte[] bf=new byte[8192]; int n,t=0;
+                    while((n=is.read(bf))>0){b.write(bf,0,n);t+=n; if(t>250_000)break;} body=b.toString("UTF-8"); }
+                String finalUrl=c.getURL().toString();
+                boolean found = code==200 && looksReal(body,finalUrl,user,st.err);
+                // redirect-away (to home/login) = not a real profile, even with 200
+                if(found && !finalUrl.toLowerCase().contains(user.toLowerCase()) && !"message".equals(st.mode)) found=looksReal(body,finalUrl,user,st.err) && meta(body,"og:title").toLowerCase().contains(user.toLowerCase());
+                if(found){ Hit hit=new Hit(); hit.site=st.name; hit.url=finalUrl;
+                    String t=meta(body,"og:title"), d=meta(body,"og:description");
+                    hit.extra=(t.isEmpty()?"":t)+(d.isEmpty()?"":" \u2014 "+(d.length()>180?d.substring(0,180)+"\u2026":d)); hits.add(hit); }
             }catch(Exception ignored){}
-            synchronized(done){ done[0]++; if(cb!=null&&done[0]%10==0) cb.status("Username scan: "+done[0]+"/"+Sites.ALL.size()+" sites checked, "+hits.size()+" found…"); }
+            synchronized(done){ done[0]++; if(cb!=null&&done[0]%10==0) cb.status("Username scan: "+done[0]+"/"+Sites.ALL.size()+" sites checked, "+hits.size()+" verified\u2026"); }
         }));
         for(Future<?> f:fs) f.get(); ex.shutdown();
         hits.sort(Comparator.comparing(a->a.site.toLowerCase())); return hits;

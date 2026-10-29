@@ -11,3 +11,8 @@ Paste an **Instagram link or @handle** → tap **SCAN**. No accounts, no tokens,
 
 **Download:** GitHub Releases → `InstaScope.apk` (debug-signed for sideloading).
 **Build:** GitHub Actions — JDK 17, Android SDK 34, Gradle 8.7. Offline logic test: `python3 tools/logic_test.py`
+
+**v1.2:** HD profile picture and post photos are now rendered inside the app (not just
+links), cross-platform hits are verified (status + final-URL + page-content checks,
+so soft-404 false positives are filtered), and an in-app browser button opens the
+profile where you can log in yourself to view stories/full posts.

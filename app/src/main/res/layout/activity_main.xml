@@ -7,9 +7,12 @@
 <Button android:id="@+id/scan" android:text="▶  SCAN" android:layout_marginTop="12dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
 <ProgressBar android:id="@+id/progress" style="?android:attr/progressBarStyleHorizontal" android:indeterminate="true" android:visibility="gone" android:layout_marginTop="12dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
 <TextView android:id="@+id/status" android:textColor="#7ED957" android:layout_marginTop="8dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+<ImageView android:id="@+id/profilePic" android:layout_width="220dp" android:layout_height="220dp" android:layout_gravity="center" android:layout_marginTop="12dp" android:visibility="gone" android:scaleType="centerCrop" android:contentDescription="Profile picture HD"/>
+<TextView android:id="@+id/postsLabel" android:textColor="#FFFFFF" android:textStyle="bold" android:layout_marginTop="10dp" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+<GridLayout android:id="@+id/postsGrid" android:columnCount="3" android:layout_width="match_parent" android:layout_height="wrap_content"/>
 <TextView android:id="@+id/result" android:textColor="#EEEEEE" android:textSize="13sp" android:fontFamily="monospace" android:layout_marginTop="10dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
 <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
 <Button android:id="@+id/share" android:text="Share / Export report" android:enabled="false" android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content"/>
-<Button android:id="@+id/openig" android:text="Open Instagram" android:enabled="false" android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content"/>
+<Button android:id="@+id/openig" android:text="Instagram (in-app browser)" android:enabled="false" android:layout_weight="1" android:layout_width="0dp" android:layout_height="wrap_content"/>
 </LinearLayout>
 </LinearLayout></ScrollView>

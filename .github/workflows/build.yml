@@ -32,7 +32,7 @@ jobs:
         if: github.ref == 'refs/heads/arena/5082c47d-insta-working-app'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.1.0
-          name: InstaScope v1.1.0
+          tag_name: v1.2.0
+          name: InstaScope v1.2.0
           files: InstaScope.apk
-          body: "v1.1: token-free. Download InstaScope.apk, allow install from browser/files, open, paste an Instagram link or @handle, tap Scan."
+          body: "v1.2: HD profile pic + post grid rendered in-app, verified cross-platform hits, in-app browser. Download InstaScope.apk, allow install from browser/files, open, paste an Instagram link or @handle, tap Scan."

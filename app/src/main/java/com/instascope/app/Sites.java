@@ -13,9 +13,7 @@ public class Sites {
         s("TikTok","https://www.tiktok.com/@{}"); s("X/Twitter","https://x.com/{}");
         s("Twitch","https://www.twitch.tv/{}"); s("Steam","https://steamcommunity.com/id/{}");
         s("Pinterest","https://www.pinterest.com/{}/"); s("Medium","https://medium.com/@{}");
-        s("Dev.to","https://dev.to/{}"); s("HackerNews","https://news.ycombinator.com/user?id={}");
-        s("StackOverflow","https://stackoverflow.com/users/{}"); // numeric-ish, kept for completeness
-        s("Keybase","https://keybase.io/{}"); s("Tumblr","https://{}.tumblr.com/");
+        s("Dev.to","https://dev.to/{}"); s("Keybase","https://keybase.io/{}"); s("Tumblr","https://{}.tumblr.com/");
         s("Flickr","https://www.flickr.com/people/{}"); s("Vimeo","https://vimeo.com/{}");
         s("SoundCloud","https://soundcloud.com/{}"); s("Spotify","https://open.spotify.com/user/{}");
         s("Patreon","https://www.patreon.com/{}"); s("Trello","https://trello.com/{}");
@@ -33,12 +31,12 @@ public class Sites {
         s("Gravatar","https://gravatar.com/{}"); s("WordPress","https://{}.wordpress.com/");
         s("Blogger","https://{}.blogspot.com/"); s("Substack","https://{}.substack.com/");
         s("Linktree","https://linktr.ee/{}"); s("Telegram","https://t.me/{}");
-        s("Discord(app)","https://discord.com/users/{}"); s("Snapchat","https://www.snapchat.com/add/{}");
+        s("Snapchat","https://www.snapchat.com/add/{}");
         s("Threads","https://www.threads.net/@{}"); s("Mastodon.social","https://mastodon.social/@{}");
         s("Bluesky","https://bsky.app/profile/{}.bsky.social"); s("Quora","https://www.quora.com/profile/{}");
         s("Wikipedia","https://en.wikipedia.org/wiki/User:{}"); s("Archive.org","https://archive.org/details/@{}");
         s("itch.io","https://{}.itch.io/"); s("Roblox","https://www.roblox.com/users/{}");
-        s("Xbox","https://account.xbox.com/en-us/profile?gamertag={}"); s("PSNProfiles","https://psnprofiles.com/{}");
+        s("PSNProfiles","https://psnprofiles.com/{}");
         s("Speedrun","https://www.speedrun.com/user/{}"); s("Tinder(Trovo)","https://trovo.live/{}");
         s("Kick","https://kick.com/{}"); s("Rumble","https://rumble.com/user/{}");
         s("DailyMotion","https://www.dailymotion.com/{}"); s("Mixcloud","https://www.mixcloud.com/{}/");
